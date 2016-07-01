@@ -56,7 +56,4 @@ class Converter:
             longitude.append((float(grid_y)-self.by)/self.ay)
 
         return (latitude,longitude)
-            
-
-
         
