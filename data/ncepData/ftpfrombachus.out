@@ -1,0 +1,54 @@
+ftp> Connected to 146.64.23.203.
+open 146.64.23.203
+220-
+220 bachus FTP server (Version wu-2.6.2(11) Thu Dec 22 07:07:30 EST 2005) ready.
+ftp> ---> user iposs qwert
+USER iposs
+331 Password required for iposs.
+---> PASS qwert
+230 User iposs logged in.
+ftp> ---> cd ursula
+CWD ursula
+250 CWD command successful.
+ftp> ---> mget FA.dat
+TYPE A
+---> PORT 146,64,23,120,194,219
+---> NLST FA.dat
+---> TYPE A
+200 Type set to A.
+---> PORT 146,64,23,120,194,220
+200 PORT command successful.
+---> RETR FA.dat
+150 Opening ASCII mode data connection for FA.dat (3150 bytes).
+226 Transfer complete.
+ftp: 3212 bytes received in Seconds Kbytes/sec.
+ftp> 0.2214.67---> mget NG.dat
+TYPE A
+---> PORT 146,64,23,120,194,221
+---> NLST NG.dat
+---> TYPE A
+200 Type set to A.
+---> PORT 146,64,23,120,194,222
+200 PORT command successful.
+---> RETR NG.dat
+150 Opening ASCII mode data connection for NG.dat (3150 bytes).
+226 Transfer complete.
+ftp: 3212 bytes received in Seconds Kbytes/sec.
+ftp> 0.2214.73---> mget SC1.dat
+TYPE A
+---> PORT 146,64,23,120,194,223
+---> NLST SC1.dat
+---> TYPE A
+200 Type set to A.
+---> PORT 146,64,23,120,194,224
+200 PORT command successful.
+---> RETR SC1.dat
+150 Opening ASCII mode data connection for SC1.dat (3151 bytes).
+226 Transfer complete.
+ftp: 3213 bytes received in Seconds Kbytes/sec.
+ftp> 0.2214.67---> bye
+QUIT
+221-You have transferred 9637 bytes in 3 files.
+221-Total traffic for this session was 10972 bytes in 6 transfers.
+221-Thank you for using the FTP service on bachus.
+221 Goodbye.

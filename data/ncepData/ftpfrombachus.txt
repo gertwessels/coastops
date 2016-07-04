@@ -1,0 +1,7 @@
+open 146.64.23.203
+user iposs qwert
+cd ursula
+mget FA.dat
+mget NG.dat
+mget SC1.dat
+bye
