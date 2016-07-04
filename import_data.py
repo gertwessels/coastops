@@ -5,10 +5,15 @@ Created on Wed Jun 15 14:15:29 2016
 @author: gwessels
 """
 
+import time
 from ocean_hdf5 import Ocean_HDF5
 import pandas as pd
+import datetime
+from zipfile import ZipFile
 #import numpy as np
 #from netCDF4 import Dataset
+
+
 
 
 def main():
@@ -17,22 +22,31 @@ def main():
 #    
 #    df = import_map2d('/data/Projects/OCIMS/python_scripts/data/exp_map2d.dat',headers=dep_avg_cur_H)
 
-    header = read_header('/data/Projects/OCIMS/python_scripts/data/exp_map2d.dat')
+#    header = read_header('/data/Projects/OCIMS/python_scripts/data/exp_map2d.dat')
+#    
+#    print 'time' in header
+#    print header
+
     
-    print 'time' in header
-    print header
+    print 'Calling'
+    time.sleep(0.1)
+    ohdf = import_map2d_dep_avg('/data/Projects/OCIMS/python_scripts/data/exp_map2d.dat')
+    
+    print ohdf
     
     
     
     
-def import_map2d(filename,nan=-999,headers=['x_coord','y_coord','u','v','uvdams','z_coord','x_centre','y_centre']):
+def import_map2d(filename,nan=-999,headers=['x_coord','y_coord','u','v','uvdams','z_coord','x_centre','y_centre'],x_col=0):
     
     df = pd.read_table(filename,skiprows=13,delim_whitespace=True,names=headers)
 #    date = pd.re
 #    amt_rows = len(df)
     
+#    print df    
+    
 #    Remove rows that contain x_coord = 0
-    df_nozero = df.loc[df['x_coord'] != 0]
+    df_nozero = df.loc[df[df.columns[x_col]] != 0]
     df_reind  = df_nozero.reset_index()
     df        = df_reind.drop('index',1)
     
@@ -57,10 +71,59 @@ def read_header(filename):
     
 def import_map2d_dep_avg(filename):
     
+    dbg = False    
+    
+
+    if dbg:
+        print 'Reading in file'
+        time.sleep(0.1)
+    
     dep_avg_cur_H = ['grid_x','grid_y','current_u','current_v','uvdams','z_coord','x_centre','y_centre']
     df = import_map2d(filename, nan=-999, headers=dep_avg_cur_H)
+    file_header = read_header(filename)
     
-    ohdf = Ocean_HDF5(filename)
+    if dbg:
+        print 'Check for timestamp'
+        time.sleep(0.1)
+        
+    if file_header[2][0] == 'time':
+        dt = file_header[2][1]
+    else:
+        dt = datetime.datetime.today()
+
+    if dbg:    
+        print 'Create Ocean HDF file'
+        time.sleep(0.1)
+    
+    ohdf = Ocean_HDF5('tmp')
+    
+    if dbg:
+        print 'Converting map2d to hdf'
+        time.sleep(0.1)
+    
+    max_len = df.index.max()
+    
+    for ind in range(max_len):
+        ohdf.append(date_time=dt, grid_x=df.grid_x[ind], grid_y=df.grid_y[ind], 
+                    current_u=df.current_u[ind], current_v=df.current_v[ind])
+        if ind % (max_len/10) == 0:
+            print str(ind) + " of " + str(max_len)
+            time.sleep(0.1)
+    
+    if dbg:
+        print 'Writing hdf'
+        time.sleep(0.1)
+    
+    ohdf.write()
+    return ohdf.dataframe()
+    
+    
+def import_ccam_uv_zip(filename):
+    
+#    Extract ccam zipfile
+    with ZipFile(zipfilename) as ccam_zip:
+        ccam_zip.extractall('./wind')
+    
     
     
         

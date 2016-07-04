@@ -76,3 +76,5 @@ class Ocean_HDF5:
     
     def max_index(self):
         return self.df.index.max()
+        
+        
