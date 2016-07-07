@@ -7,9 +7,16 @@ Created on Wed Jun 15 14:15:29 2016
 
 import time
 from ocean_hdf5 import Ocean_HDF5
+from atmos_hdf5 import Atmos_HDF5
 import pandas as pd
 import datetime
 from zipfile import ZipFile
+import os
+import multiprocessing
+import timeit
+from numpy import nan
+
+
 #import numpy as np
 #from netCDF4 import Dataset
 
@@ -28,12 +35,16 @@ def main():
 #    print header
 
     
-    print 'Calling'
-    time.sleep(0.1)
-    ohdf = import_map2d_dep_avg('/data/Projects/OCIMS/python_scripts/data/exp_map2d.dat')
     
-    print ohdf
+#    print 'Calling'
+#    time.sleep(0.1)
+#    ohdf = import_map2d_dep_avg('/data/Projects/OCIMS/python_scripts/data/exp_map2d.dat')
+#    
+#    print ohdf
+#    
+#    import_ccam_uv_zip('data/ccam_uv.zip')
     
+    import_ncep_text_file('data/NG.dat')
     
     
     
@@ -73,7 +84,6 @@ def import_map2d_dep_avg(filename):
     
     dbg = False    
     
-
     if dbg:
         print 'Reading in file'
         time.sleep(0.1)
@@ -95,7 +105,7 @@ def import_map2d_dep_avg(filename):
         print 'Create Ocean HDF file'
         time.sleep(0.1)
     
-    ohdf = Ocean_HDF5('tmp')
+    ohdf = Ocean_HDF5(filename)
     
     if dbg:
         print 'Converting map2d to hdf'
@@ -117,18 +127,144 @@ def import_map2d_dep_avg(filename):
     ohdf.write()
     return ohdf.dataframe()
     
+def import_ncep_text_file(filename):
     
-def import_ccam_uv_zip(filename):
+    ncep_date_parser = lambda x:datetime.datetime.strptime(x, "%Y%m%d%H")
+
+    with open(filename, 'r') as f:
+        first_line = f.readline().split()
+
+    lat = float(first_line[1])
+    lon = float(first_line[2])
+    
+    df_ocean = pd.read_csv(filename,delim_whitespace=True,parse_dates=[0],
+                           skiprows=3, date_parser=ncep_date_parser,
+                           names=['sign_wave_height','peak_wave_period','peak_wave_dir','ms','wl','windspeed','winddir'],
+                           usecols=['sign_wave_height','peak_wave_period','peak_wave_dir','direc_spread','water_level'])
+                           
+    
+
+#    df = df.rename(columns={'tyd':'date_time','u':'x_wind','v':'y_wind', 
+#                       'psl':'air_pressure'})
+    
+#    df['latitude']= lat
+#    df['longitude'] = lon
+#    df['altitude'] = 0
+#    df['grid_x'] = nan 
+#    df['grid_y'] = nan
+#    df['air_temperature'] = nan 
+#    df['precipitation_amount'] = nan 
+#    df['relative_humidity'] = nan
+    
+#    Remove duplicate time entries and keeping the last entry
+    df = df[df.duplicated(['date_time','latitude','longitude'], keep='last')]
+    
+    return df
+
+    
+def import_ccam_text_file(coord_file):
+    
+    path = './tmp_wind/'
+    
+    ccam_date_parser = lambda x:datetime.datetime.strptime(x,"%HZ%d%b%Y")
+
+    coord = coord_file[:len(coord_file)-4][8:]
+    [lat,lon] = coord.split('_',1)
+    lat = float(lat[:-1])
+    lon = float(lon[:-1])
+    
+    df = pd.read_csv(path+coord_file,delim_whitespace=True,
+                     parse_dates=[0],date_parser=ccam_date_parser)
+
+    df = df.rename(columns={'tyd':'date_time','u':'x_wind','v':'y_wind', 
+                       'psl':'air_pressure'})
+    
+    df['latitude']= lat
+    df['longitude'] = lon
+    df['altitude'] = 0
+    df['grid_x'] = nan 
+    df['grid_y'] = nan
+    df['air_temperature'] = nan 
+    df['precipitation_amount'] = nan 
+    df['relative_humidity'] = nan
+    
+#    Remove duplicate time entries and keeping the last entry
+    df = df[df.duplicated(['date_time','latitude','longitude'], keep='last')]
+    
+    return df
+
+    
+def import_ccam_uv_zip(filename,n_proc=4):
+    
+    path = './tmp_wind/'
+#    n_proc = 4    
+    
+#    ahdf = Atmos_HDF5(filename)
+    ahdf = pd.DataFrame(columns=['date_time','latitude', 'longitude', 'grid_x',
+                                 'grid_y', 'altitude', 'x_wind', 'y_wind', 
+                                 'air_pressure','air_temperature', 
+                                 'precipitation_amount', 'relative_humidity'])
     
 #    Extract ccam zipfile
-    with ZipFile(zipfilename) as ccam_zip:
-        ccam_zip.extractall('./wind')
+    with ZipFile(filename) as ccam_zip:
+        ccam_zip.extractall(path)
     
     
+    print "Start:  " + str(datetime.datetime.today())
+    time.sleep(0.1)
     
+
+    p = multiprocessing.Pool(processes=n_proc)
+    df_array = p.map(import_ccam_text_file,os.listdir(path))
+    
+#    print df_array
+    
+    print "After processing:  " + str(datetime.datetime.today())
+    time.sleep(0.1)
+
+#    for df in df_array:
+#        ahdf = ahdf.append(df)
+
+    ahdf = pd.concat(df_array,keys=os.listdir(path))
+    
+    print "After concatenation:  " + str(datetime.datetime.today())
+    time.sleep(0.1)
+    
+#    cnt = len(os.listdir(path))
+#    for coord_file in os.listdir(path):
+#        cnt -= 1
+#        print cnt
         
+#    ##########################################
+#        coord = coord_file[:len(coord_file)-4][8:]
+#        [lat,lon] = coord.split('_',1)
+#        lat = float(lat[:-1])
+#        lon = float(lon[:-1])
+#        
+#        df = pd.read_csv(path+coord_file,delim_whitespace=True,
+#                         parse_dates=[0],date_parser=ccam_date_parser)
+#
+#        df = df.rename(columns={'tyd':'date_time','u':'x_wind','v':'y_wind', 
+#                           'psl':'air_pressure'})
+#        
+#        df['latitude']= lat
+#        df['longitude'] = lon
+#        df['altitude'] = 0
+#        df['grid_x'] = nan 
+#        df['grid_y'] = nan
+#        df['air_temperature'] = nan 
+#        df['precipitation_amount'] = nan 
+#        df['relative_humidity'] = nan
+#    ##########################################
         
+#        ahdf = ahdf.append(df)
+
+
+    ahdf.to_hdf(filename+'.hdf','ccam',mode='w')
         
+    
+    print "After write to file:  " + str(datetime.datetime.today())
+    time.sleep(0.1)
         
 #def write_map2d_netcdf4(filename, dataframe, time=[]):
 #    """ dataframe is a pandas.core.frame.DataFrame or list (type) or a list of dataframes
