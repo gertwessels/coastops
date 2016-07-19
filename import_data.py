@@ -44,7 +44,7 @@ def main():
 #    
 #    import_ccam_uv_zip('data/ccam_uv.zip')
     
-    import_ncep_text_file('data/NG.dat')
+    import_ncep_text_file('data/ncepData/NG.dat')
     
     
     
@@ -137,29 +137,60 @@ def import_ncep_text_file(filename):
     lat = float(first_line[1])
     lon = float(first_line[2])
     
-    df_ocean = pd.read_csv(filename,delim_whitespace=True,parse_dates=[0],
-                           skiprows=3, date_parser=ncep_date_parser,
-                           names=['sign_wave_height','peak_wave_period','peak_wave_dir','ms','wl','windspeed','winddir'],
-                           usecols=['sign_wave_height','peak_wave_period','peak_wave_dir','direc_spread','water_level'])
-                           
+    ohdf = pd.read_csv(filename,delim_whitespace=True,parse_dates=[0],
+                           skiprows=1, date_parser=ncep_date_parser,
+                           names=['date_time','sign_wave_height','peak_wave_period','peak_wave_dir','windspeed','winddir'],
+                           usecols=['date_time','sign_wave_height','peak_wave_period','peak_wave_dir'])
     
-
+    ahdf = pd.read_csv(filename,delim_whitespace=True,parse_dates=[0],
+                           skiprows=1, date_parser=ncep_date_parser,
+                           names=['date_time','sign_wave_height','peak_wave_period','peak_wave_dir','windspeed','winddir'],
+                           usecols=['date_time','windspeed','winddir'])
+                           
 #    df = df.rename(columns={'tyd':'date_time','u':'x_wind','v':'y_wind', 
 #                       'psl':'air_pressure'})
     
-#    df['latitude']= lat
-#    df['longitude'] = lon
-#    df['altitude'] = 0
-#    df['grid_x'] = nan 
-#    df['grid_y'] = nan
-#    df['air_temperature'] = nan 
-#    df['precipitation_amount'] = nan 
-#    df['relative_humidity'] = nan
+    ahdf['latitude']= lat
+    ahdf['longitude'] = lon
+    ahdf['altitude'] = 0
+    ahdf['grid_x'] = nan 
+    ahdf['grid_y'] = nan
+    ahdf['air_temperature'] = nan 
+    ahdf['precipitation_amount'] = nan 
+    ahdf['relative_humidity'] = nan
     
 #    Remove duplicate time entries and keeping the last entry
-    df = df[df.duplicated(['date_time','latitude','longitude'], keep='last')]
+    ahdf = ahdf[ahdf.duplicated(['date_time','latitude','longitude'], keep='last')]
     
-    return df
+    ohdf['latitude']= lat
+    ohdf['longitude'] = lon
+    ohdf['grid_x'] = nan 
+    ohdf['grid_y'] = nan
+    ohdf['depth'] = nan
+    ohdf['total_depth'] = nan
+    ohdf['current_u'] = nan 
+    ohdf['current_v'] = nan
+    ohdf['water_level'] = nan
+    ohdf['vorticity'] = nan
+    ohdf['enstrophy'] = nan
+    ohdf['mean_wave_period'] = nan
+    ohdf['mean_wave_dir'] = nan
+    ohdf['direc_spread'] = nan 
+    ohdf['energy_dissip'] = nan 
+    ohdf['energy_leak'] = nan 
+    ohdf['fraction_breaking'] = nan 
+    ohdf['orbital_vel'] = nan 
+    ohdf['mean_steepness'] = nan 
+    ohdf['mean_wave_height'] = nan 
+    ohdf['energy_dissipation'] = nan 
+    
+    
+#    Remove duplicate time entries and keeping the last entry
+    ohdf = ohdf[ohdf.duplicated(['date_time','latitude','longitude'], keep='last')]
+    
+    
+    
+    return (ohdf, ahdf)
 
     
 def import_ccam_text_file(coord_file):
@@ -190,6 +221,8 @@ def import_ccam_text_file(coord_file):
     
 #    Remove duplicate time entries and keeping the last entry
     df = df[df.duplicated(['date_time','latitude','longitude'], keep='last')]
+    
+    
     
     return df
 
