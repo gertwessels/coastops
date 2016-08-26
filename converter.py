@@ -36,7 +36,7 @@ class Converter:
             y.append(float(longitude)*self.ay + self.by)
 
         return (x,y)
-            
+    
     def lat_long(self,grid_x,grid_y):
         """
             Input can be either a single value or a array

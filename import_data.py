@@ -146,7 +146,8 @@ def import_ncep_text_file(filename):
                            skiprows=1, date_parser=ncep_date_parser,
                            names=['date_time','sign_wave_height','peak_wave_period','peak_wave_dir','windspeed','winddir'],
                            usecols=['date_time','windspeed','winddir'])
-                           
+    
+    
 #    df = df.rename(columns={'tyd':'date_time','u':'x_wind','v':'y_wind', 
 #                       'psl':'air_pressure'})
     
@@ -160,7 +161,10 @@ def import_ncep_text_file(filename):
     ahdf['relative_humidity'] = nan
     
 #    Remove duplicate time entries and keeping the last entry
-    ahdf = ahdf[ahdf.duplicated(['date_time','latitude','longitude'], keep='last')]
+#    ahdf = ahdf[ahdf.duplicated(['date_time','latitude','longitude'], keep='last')]
+    
+    
+#    print ahdf    
     
     ohdf['latitude']= lat
     ohdf['longitude'] = lon
@@ -184,13 +188,13 @@ def import_ncep_text_file(filename):
     ohdf['mean_wave_height'] = nan 
     ohdf['energy_dissipation'] = nan 
     
-    
+#    print ohdf
 #    Remove duplicate time entries and keeping the last entry
-    ohdf = ohdf[ohdf.duplicated(['date_time','latitude','longitude'], keep='last')]
+#    ohdf = ohdf[ohdf.duplicated(['date_time','latitude','longitude'], keep='last')]
     
     
-    
-    return (ohdf, ahdf)
+    hdf_dict = {'Ocean_HDF':ohdf, 'Atmos_HDF':ahdf}
+    return  hdf_dict
 
     
 def import_ccam_text_file(coord_file):
@@ -221,8 +225,6 @@ def import_ccam_text_file(coord_file):
     
 #    Remove duplicate time entries and keeping the last entry
     df = df[df.duplicated(['date_time','latitude','longitude'], keep='last')]
-    
-    
     
     return df
 
