@@ -18,9 +18,9 @@ class Config_File:
 
 #        If the file exist, read it into self.df or else create a blank self.df
         if os.path.isfile(self.file):
-            self.df = pd.read_csv(self.file)
+            self.df = pd.read_csv(self.file,header=0,index_col=0)
         else:
-            d = {'datatime':[datetime.now()],'model_date':[nan], 'runid':[nan],'model_zip':['model.zip']}
+            d = {'datatime':[datetime.now()],'model_date':[nan], 'runid':[nan], 'model_zip':[nan]}
             self.df = pd.DataFrame(data=d)
 
 #        return self.df
@@ -32,15 +32,15 @@ class Config_File:
         self.df = data
 
 #    self,datetime,date,string,string
-    def add_entry(self,model_zip,dt=datetime.now(),model_date=datetime.today().date(),runid=nan):
-        
+    def add_entry(self,model_zip='unknown',dt=datetime.now(),model_date=datetime.today().date(),runid=nan):
         if self.df.index.max() != self.df.index.max():
             index = -1
         else:
             index = self.df.index.max()
         
-        self.df.loc[index + 1] = [dt, model_date, model_zip, runid]
-        
+        self.df.loc[index + 1] = {'datatime':dt,'model_date':model_date, 'model_zip':model_zip, 'runid':runid}
+
+    
     def get_last(self):
         ind = self.df.index.max()
 #        print ind
@@ -56,7 +56,7 @@ class Config_File:
 #        The runid should have a format:  <some unique 3 letter identifier>_0000
 #       A unique runid is required if you wish to use the restart file
         df = self.get_last()
-        print df        
+#        print df        
         
         runid = ''
         if df['runid'] != df['runid']:

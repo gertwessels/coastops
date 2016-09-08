@@ -5,6 +5,8 @@ Created on Wed Jun 15 10:33:17 2016
 @author: gwessels
 """
 
+import netCDF4 as nc
+
 class Converter:
     
     def __init__(self,ax=1,bx=0,ay=1,by=0):
@@ -56,4 +58,25 @@ class Converter:
             longitude.append((float(grid_y)-self.by)/self.ay)
 
         return (latitude,longitude)
-        
+
+
+# Rework of a script by Bjorn Backeberg
+def hdf_to_nc4(converter,ohdf, ahdf=0, nc4_out='from_hdf.nc'):
+    
+    rootgrp = nc.Dataset(nc4_out, "w", format="NETCDF4")
+
+    grid_x = ohdf['grid_x']
+    grid_y = ohdf['grid_y']
+
+    lon = ohdf['longitude']
+    lat = ohdf['latitude']
+
+    # define dimensions
+    longitude = rootgrp.createDimension("longitude", len(lon))
+    latitude = rootgrp.createDimension("latitude", len(lat))
+    time = rootgrp.createDimension("time", len(julday))
+    
+    return
+    
+    
+    

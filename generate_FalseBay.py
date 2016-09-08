@@ -34,9 +34,18 @@ def generate_FalseBay_model():
     dt_min     =  180.0
 
 #    This depends on when it will be run. If you run it at 20:00 on Monday to provide a 
-#    forecast for Tuesday then you should adjust date_start.    
-    date_start = dt.datetime(dt.datetime.now().year,dt.datetime.now().month,dt.datetime.now().day,0,0,0)
-    date_end   = date_start + dt.timedelta(days=2)
+#    forecast for Tuesday then you should adjust date_start.   
+#    This is only a proposed start date-time. 
+    proposed_start = dt.datetime(dt.datetime.now().year,dt.datetime.now().month,dt.datetime.now().day,0,0,0)
+    date_end   = proposed_start + dt.timedelta(days=2)
+    
+    hdf_dict = get_ncep()
+#    print 'Result of get_ncep():'
+#    print hdf_dict.keys()
+#    print len(hdf_dict['Ocean_HDF']), len(hdf_dict['Atmos_HDF'])
+    
+#    date_start will be the first entry after the proposed_start date    
+    date_start = dt.datetime.strptime(str(hdf_dict['Atmos_HDF'][hdf_dict['Atmos_HDF'].date_time >= proposed_start.strftime('%Y/%m/%d %H:%M:%S')].values[0][0]),'%Y-%m-%d %H:%M:%S')
     
 ##    Retrieve last run's details
 #    df_config = Config_File('FB_config')
@@ -45,8 +54,9 @@ def generate_FalseBay_model():
 #    Add current run's details.
     df_config = Config_File('FB_config')
 #    Create runid
-    runid = df_config.generate_runid('fb1')
-    df_config.add_entry(new_model_dir,dt.datetime.now(),date_start,runid)
+    new_runid = df_config.generate_runid('fb1')
+
+    df_config.add_entry(model_zip=new_model_dir,model_date=date_start,runid=new_runid)
     df_config.write()
 
     # check if restart file exists in old run
@@ -56,13 +66,16 @@ def generate_FalseBay_model():
     with ZipFile(original_model_zipfile) as model_zip:
         model_zip.extractall(new_model_dir)
 
-    hdf_dict = get_ncep()
     
-    d3d.generate_wavecon(runid, referencedate, date_start, date_end, dt_min, hdf_dict['Ocean_HDF'], hdf_dict['Atmos_HDF'])
-    d3d.generate_wnd(runid, referencedate, date_start, date_end, dt_min, hdf_dict['Atmos_HDF'])
+    print '\nWavecon:'
+    d3d.generate_wavecon(new_runid, referencedate, date_start, date_end, dt_min, hdf_dict['Ocean_HDF'], hdf_dict['Atmos_HDF'])
+    print '\nWnd:'
+    d3d.generate_wnd(new_runid, referencedate, date_start, date_end, dt_min, hdf_dict['Atmos_HDF'])
     
-    modify_mdw(new_model_dir+'/'+'Oper.mdw',new_model_dir+'/'+new_model_dir+'.mdw','False_Bay9_operational.mdf',referencedate)
-    modify_mdf(new_model_dir+'/False_Bay9_operational.mdf',new_model_dir+'/False_Bay9_operational.mdf',referencedate,date_start,date_end)
+    print '\nGenerate mdw'
+    modify_mdw(new_model_dir+'/model_base/Oper.mdw',new_model_dir+'/model_base/'+new_model_dir+'.mdw','False_Bay9_operational.mdf',referencedate)
+    print '\nGenerate mdf'
+    modify_mdf(new_model_dir+'/model_base/False_Bay9_operational.mdf',new_model_dir+'/model_base/False_Bay9_operational.mdf',referencedate,date_start,date_end)
     
 
 def modify_mdw(file_in,file_out,mdf,ref):
@@ -103,8 +116,9 @@ def get_ncep():
     filename = generate_foldername()+'_SC1.ncep'
     
     log.append(ncep.retrbinary('RETR SC1.dat', open(filename,'w').write))
-#    log.append(ncep.retrbinary('RETR NG.dat',  open(generate_foldername()+'_NG.ncep','w').write))
-#    log.append(ncep.retrbinary('RETR FA.dat',  open(generate_foldername()+'_FA.ncep','w').write))
+    
+##    log.append(ncep.retrbinary('RETR NG.dat',  open(generate_foldername()+'_NG.ncep','w').write))
+##    log.append(ncep.retrbinary('RETR FA.dat',  open(generate_foldername()+'_FA.ncep','w').write))
     
     hdf_dict = import_ncep_text_file(filename)
     
