@@ -4,9 +4,23 @@ Created on Wed Jun 15 10:33:17 2016
 
 @author: gwessels
 """
+import os
+from glob import glob
+from netCDF4 import Dataset, num2date, date2num
+from numpy import empty, size
+from datetime import datetime, timedelta
+import time as t
 
-import netCDF4 as nc
-
+def main():
+#    x = (a,b)
+    x = (-65686/18.28667, 500000)
+#    y = (a,b)
+    y = (-3786230/-34.204, 4000000)
+    
+    falsebay = Converter(ax=x[0],bx=x[1],ay=y[0],by=y[1])
+#    hdf_to_nc4(falsebay)
+    
+    
 class Converter:
     
     def __init__(self,ax=1,bx=0,ay=1,by=0):
@@ -68,15 +82,35 @@ def hdf_to_nc4(converter,ohdf, ahdf=0, nc4_out='from_hdf.nc'):
     grid_x = ohdf['grid_x']
     grid_y = ohdf['grid_y']
 
-    lon = ohdf['longitude']
-    lat = ohdf['latitude']
+    lat,lon = converter(grid_x, grid_y)
+    
+#    lon = ohdf['longitude']
+#    lat = ohdf['latitude']
 
     # define dimensions
+    rootgrp = Dataset(nc4_out, "w", format="NETCDF4")
     longitude = rootgrp.createDimension("longitude", len(lon))
-    latitude = rootgrp.createDimension("latitude", len(lat))
-    time = rootgrp.createDimension("time", len(julday))
+    latitude  = rootgrp.createDimension("latitude", len(lat))
+    time      = rootgrp.createDimension("time",len(ohdf["date_time"]))
+
+    longitudes = rootgrp.createVariable("longitude","f8",("longitude",),fill_value = 9.9999996169031625e+35)
+    longitudes.units = "degrees_east"
+    longitudes.standard_name = "longitude"
+    longitudes.long_name = "longitude"
     
-    return
+    latitudes = rootgrp.createVariable("latitude","f8",("latitude",),fill_value = 9.9999996169031625e+35)
+    longitudes.units = "degrees_north"
+    longitudes.standard_name = "latitude"
+    longitudes.long_name = "latitude"
+    
+    times = rootgrp.createVariable("time","f8",("time",),fill_value = -32767.0)
     
     
     
+    
+    return 0
+    
+
+    
+if __name__ == '__main__':
+    main()

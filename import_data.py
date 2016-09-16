@@ -47,7 +47,6 @@ def main():
     import_ncep_text_file('data/ncepData/NG.dat')
     
     
-    
 def import_map2d(filename,nan=-999,headers=['x_coord','y_coord','u','v','uvdams','z_coord','x_centre','y_centre'],x_col=0):
     
     df = pd.read_table(filename,skiprows=13,delim_whitespace=True,names=headers)
