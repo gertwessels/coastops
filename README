@@ -1,0 +1,47 @@
+20YYMMDD_HHh_currents (.csv,.xlsx,.hdf) contain all the recorded information regarding the currents generated on 20YY/MM/DD at HH hour. 
+
+Below find the fields saved within each of the 3 files.
+
+index,matlabTime,M,N,layer,X,Y,Z,latitude,longitude,X_comp,Y_comp,speed,direction,dateTime
+
+index	   : refers to the entry within the file.
+matlabTime : refers to the whole and fractional number of days from January 0, 0000 which was the format provided by the output file.
+M	   : The integer grid coordinate in the Eastern direction
+N	   : The integer grid coordinate in the Northern direction
+layer	   : The number of the layer
+X	   : The x component of the model coordinate in meters.
+Y 	   : The y component of the model coordinate in meters.
+Z	   : The depth of the layer at the model coordinate in meters.
+latitude   : The latitude at the model coordinate.
+longitude  : The longitude at the model coordinate.
+speed	   : The speed of the current in meter per second.
+direction  : The direction of the current relative to true north.
+datetime   : The date model time of this entry (DD MMMM YYYY, HH:mm:ss)
+
+20YYMMDD_HHh_waves_wind (.csv,.xlsx,.hdf) contain all the recorded information regarding the waves and wind generated on 20YY/MM/DD at HH hour. 
+
+Below find the fields saved within each of the 3 files.
+
+,matlabTime,M,N,X,Y,latitude,longitude,hm0,tm0,wave_x,wave_y,wind_x,wind_y,wave direction,dateTime,wind speed,wind direction
+
+index	   : refers to the entry within the file.
+matlabTime : refers to the whole and fractional number of days from January 0, 0000 which was the format provided by the output file.
+M	   : The integer grid coordinate in the Eastern direction
+N	   : The integer grid coordinate in the Northern direction
+layer	   : The number of the layer
+X	   : The x component of the model coordinate in meters.
+Y 	   : The y component of the model coordinate in meters.
+latitude   : The latitude at the model coordinate.
+longitude  : The longitude at the model coordinate.
+hm0	   : Significant wave height in meters.
+tm0  	   : Relative peak wave period in seconds.
+wave_x	   : The wave vector in the peak direction's x component.
+wave_y	   : The wave vector in the peak direction's y component.
+wind_x	   : The wind vector's x component.
+wind_y	   : The wind vector's y component.
+wave direction  : The direction of the wave relative to true north. 
+datetime   : The date model time of this entry (DD MMMM YYYY, HH:mm:ss)
+wind speed : The speed of the wind in meter per second.
+wind direction  : The direction of the wind relative to true north. 
+
+
